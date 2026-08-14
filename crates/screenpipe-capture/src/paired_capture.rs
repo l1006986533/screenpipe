@@ -297,6 +297,7 @@ pub async fn paired_capture(
                 || n.contains("kitty")
                 || n.contains("hyper")
                 || n.contains("warp")
+                || n.contains("code")
         });
     let has_accessibility_text = !app_prefers_ocr
         && tree_snapshot
@@ -507,7 +508,7 @@ pub async fn paired_capture(
                 #[cfg(target_os = "macos")]
                 {
                     let (text, json, _confidence) =
-                        screenpipe_screen::perform_ocr_apple(&image_for_ocr, &languages);
+                        screenpipe_screen::perform_ocr_tesseract(&image_for_ocr, languages);
                     (text, json)
                 }
                 #[cfg(not(target_os = "macos"))]

@@ -28,6 +28,7 @@ fn ensure_tessdata_prefix() {
     // Common distro paths for tessdata (the .deb depends on tesseract-ocr,
     // so host paths must keep working)
     let candidates = [
+        "/opt/homebrew/share/tessdata", // Homebrew on Apple Silicon
         "/usr/share/tesseract-ocr/5/tessdata",
         "/usr/share/tesseract-ocr/4/tessdata",
         "/usr/share/tesseract/tessdata",
