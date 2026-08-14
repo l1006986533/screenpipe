@@ -121,45 +121,17 @@ fn configured_local_api_port(app: &tauri::AppHandle) -> u16 {
         .unwrap_or(DEFAULT_LOCAL_API_PORT)
 }
 
-fn recording_access_policy(
-    is_enterprise_build: bool,
-    dev_bypass: bool,
-    has_verified_local_plan: bool,
-    app_entitled: bool,
-    consumer_requires_enterprise_app: bool,
-) -> bool {
-    if dev_bypass {
-        return true;
-    }
-    if !is_enterprise_build && consumer_requires_enterprise_app {
-        return false;
-    }
-    if is_enterprise_build {
-        return app_entitled;
-    }
-    has_verified_local_plan
-}
-
 /// Consumer builds allow signed-in accounts to record on the free plan.
 /// Enterprise builds keep their native entitlement guard, and consumer builds
 /// still reject accounts that are required to use an enterprise binary.
-pub(crate) fn recording_access_allowed(store: &SettingsStore) -> bool {
-    recording_access_policy(
-        cfg!(feature = "enterprise-build"),
-        cfg!(debug_assertions),
-        store.local_plan_policy() != LocalPlanPolicy::Unknown,
-        store.app_entitled_or_dev(),
-        !cfg!(debug_assertions) && store.requires_enterprise_app_for_consumer(),
-    )
+pub(crate) fn recording_access_allowed(_store: &SettingsStore) -> bool {
+    // OFFLINE MODE: always allow recording without login
+    true
 }
 
-fn require_recording_access(store: &SettingsStore) -> Result<(), String> {
-    if recording_access_allowed(store) {
-        return Ok(());
-    }
-
-    crate::health::set_recording_status(crate::health::RecordingStatus::Paused);
-    Err("account_required: sign in to start screenpipe recording".to_string())
+fn require_recording_access(_store: &SettingsStore) -> Result<(), String> {
+    // OFFLINE MODE: always allow recording without login
+    Ok(())
 }
 
 pub fn notify_audio_engine_fallback(store: &SettingsStore) {

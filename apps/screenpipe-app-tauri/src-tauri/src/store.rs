@@ -2026,38 +2026,6 @@ impl SettingsStore {
         self.has_verified_paid_plan()
     }
 
-    /// Consumer binaries must not record behind an org's mandatory-enterprise-
-    /// app screen. A separate consumer subscription remains a valid opt-out,
-    /// matching the frontend account-routing policy.
-    pub(crate) fn requires_enterprise_app_for_consumer(&self) -> bool {
-        let requires_enterprise_app = self
-            .user
-            .enterprise_account
-            .as_ref()
-            .and_then(|account| account.get("requires_enterprise_app"))
-            .and_then(serde_json::Value::as_bool)
-            .unwrap_or(false);
-        if !requires_enterprise_app {
-            return false;
-        }
-
-        let has_consumer_entitlement = self
-            .user
-            .entitlement
-            .as_ref()
-            .and_then(|entitlement| entitlement.get("source"))
-            .and_then(serde_json::Value::as_str)
-            .is_some_and(|source| {
-                matches!(
-                    source.to_ascii_lowercase().as_str(),
-                    "subscription" | "manual" | "lifetime"
-                )
-            })
-            && self.has_current_app_entitlement();
-
-        !has_consumer_entitlement
-    }
-
     pub fn audio_engine_resolution(&self) -> AudioEngineResolution {
         let has_cloud_auth = self
             .resolved_cloud_auth_token(crate::auth_token::cached_cloud_token())
